@@ -18,6 +18,7 @@
             #pragma vertex vert
             #pragma fragment frag
             #include "UnityCG.cginc"
+			#pragma enable_d3d11_debug_symbols
 			
 			fixed4 _Color1;
 			fixed4 _Color2;
