@@ -39,26 +39,29 @@
 				return 6*pow(x, 5) - 15*pow(x, 4) + 10*pow(x, 3);
 			}
 			
+			float length (float2 g)
+			{
+				return sqrt(g.x*g.x + g.y*g.y);
+			}
+			
+			float length (float3 g)
+			{
+				return sqrt(g.x*g.x + g.y*g.y + g.z*g.z);
+			}
+			
 			float2 normalize (float2 g)
 			{
-				float length = sqrt(g.x*g.x + g.y*g.y);
-				return g / length;
+				return g / length(g);
 			}
 			
 			float3 normalize (float3 g)
 			{
-				float length = sqrt(g.x*g.x + g.y*g.y + g.z*g.z);
-				return g / length;
+				return g / length(g);
 			}
 			
 			float dot (float2 g1, float2 g2)
 			{
 				return g1.x*g2.x + g1.y*g2.y;
-			}
-			
-			float length (float2 g)
-			{
-				return sqrt(g.x*g.x + g.y*g.y);
 			}
 			
 			float dist (float2 g1, float2 g2)
@@ -285,7 +288,8 @@
 
             fixed4 frag (v2f i) : SV_Target
             {
-				return perlin3d (i.oPos.x, i.oPos.y, i.oPos.z);
+				return perlin2d (i.oPos.x, i.oPos.y);
+				//return perlin3d (i.oPos.x, i.oPos.y, i.oPos.z);
             }
 			
             ENDCG
