@@ -3,7 +3,9 @@ using System.Collections;
 
 public class MeshStretcher : MonoBehaviour {
 
-    public float Factor;
+    public float Factor = 1;
+
+    private Vector3[] OriginalVertices;
 
     private Mesh _mesh;
     private Mesh Mesh
@@ -13,6 +15,7 @@ public class MeshStretcher : MonoBehaviour {
             if (_mesh == null)
             {
                 _mesh = GetComponent<MeshFilter>().sharedMesh;
+                OriginalVertices = _mesh.vertices;
             }
             return _mesh;
         }
@@ -28,5 +31,10 @@ public class MeshStretcher : MonoBehaviour {
 
         Mesh.vertices = vertices;
         Mesh.RecalculateBounds();
+    }
+
+    public void Reset ()
+    {
+        Mesh.vertices = OriginalVertices;
     }
 }

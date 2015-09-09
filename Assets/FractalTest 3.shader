@@ -34,33 +34,70 @@
 			//--------------------------- HELPER FUNCTIONS -----------------------------------
 			//--------------------------------------------------------------------------------
 			
-			float2 normalize (float2 gradient)
+			float blendf (float x)
 			{
-				float length = sqrt(gradient.x*gradient.x + gradient.y*gradient.y);
-				return gradient / length;
+				return 6*pow(x, 5) - 15*pow(x, 4) + 10*pow(x, 3);
+			}
+			
+			float2 normalize (float2 g)
+			{
+				float length = sqrt(g.x*g.x + g.y*g.y);
+				return g / length;
+			}
+			
+			float3 normalize (float3 g)
+			{
+				float length = sqrt(g.x*g.x + g.y*g.y + g.z*g.z);
+				return g / length;
 			}
 			
 			float dot (float2 g1, float2 g2)
 			{
-				return g1.x*g2.x+g1.y*g2.x;
+				return g1.x*g2.x + g1.y*g2.y;
+			}
+			
+			float length (float2 g)
+			{
+				return sqrt(g.x*g.x + g.y*g.y);
 			}
 			
 			float dist (float2 g1, float2 g2)
 			{
 				float2 d = g2 - g1;
-				return sqrt(d.x*d.x+d.y*d.y);
+				return length (d);
 			}
 			
-			float random (float number, int primeSeed)
+			// Project a onto b
+			float2 project (float2 a, float2 b)
 			{
-				int x = int (number);
-				x = (x<<13) ^ x;
-				return ( 1.0 - ( (x * (x * x * primeSeed + 789221) + 1376312589) & 2147483647) / 1073741824.0);
+				return dot (a, b)/length(b);
 			}
 			
-			float2 randomGradient (float x, float y)
+			// 1d white noise
+			float random (float x, int primeSeed)
 			{
-				float val = x+y*1000;
+				// I stole this from somewhere (and then butchered it)
+				// TODO: Remember where I found this and give credit or whatever
+				int r = int (x);	// TODO: Refactor, this is really stupid and counterintuitive (one might expect to get different numbers in-between whole numbers. Fools :D)
+				r = (r<<13) ^ r;
+				return ( 1.0 - ( (r * (r * r * primeSeed + 789221) + 1376312589) & 2147483647) / 1073741824.0);
+			}
+			
+			// 2d white noise
+			float random2d (float x, float y, int primeSeed)
+			{
+				return random (x+y*101, primeSeed);
+			}
+			
+			// 3d white noise
+			float random3d (float x, float y, float z, int primeSeed)
+			{
+				return random (x+y*101+z*99991, primeSeed);
+			}
+			
+			float2 randomGradient2d (float x, float y)
+			{
+				float val = x+y*101;
 				// TODO: improve randomness
 				float xg = (random(val, 78779));
 				float yg = (random(val, 81439));
@@ -69,60 +106,168 @@
 				return normalize(gradient);
 			}
 			
+			float2 randomGradient2d (float2 p)
+			{
+				return randomGradient2d (p.x, p.y);
+			}
+			
+			float3 randomGradient3d (float x, float y, float z)
+			{
+				// TODO: improve randomness
+				float xg = (random3d(x, y, z, 78779));
+				float yg = (random3d(x, y, z, 81439));
+				float zg = (random3d(x, y, z, 55901));
+				
+				float3 gradient = float3 (xg, yg, zg);
+				return normalize(gradient);
+			}
+			
+			float3 randomGradient3d (float3 p)
+			{
+				return randomGradient3d (p.x, p.y, p.z);
+			}
+			
 			//--------------------------------------------------------------------------------
 			//--------------------------- STUFF THAT DOES STUFF ------------------------------
 			//--------------------------------------------------------------------------------
-			
-			// failed perlin attempt
-			float noise2d (float x, float y)
+
+			float perlin2d (float x, float y)
 			{
 				// Get gradients of corners
 				float xf = floor(x);
 				float yf = floor(y);
-				float2 g1 = randomGradient (xf, yf);
-				float2 g2 = randomGradient (xf+1, yf);
-				float2 g3 = randomGradient (xf, yf+1);
-				float2 g4 = randomGradient (xf+1, yf+1);
+				float2 g1 = randomGradient2d (xf, yf);
+				float2 g2 = randomGradient2d (xf+1, yf);
+				float2 g3 = randomGradient2d (xf, yf+1);
+				float2 g4 = randomGradient2d (xf+1, yf+1);
 				
-				// Get vectors from corners to point
-				float2 d1 = float2(x, y) - float2(xf, yf);
-				float2 d2 = float2(x, y) - float2(xf+1, yf);
-				float2 d3 = float2(x, y) - float2(xf, yf+1);
-				float2 d4 = float2(x, y) - float2(xf+1, yf+1);
+				// Calculate heights from gradients 
+				float2 a1 = float2 (x, y) - float2 (xf, yf);
+				a1 -= g1 * 0.5; //< Offset gradient (or, actually, offset pixel position, but the outcome is the same), so it's center is on the corner point
+				float2 b1 = g1;
+				float h1 = project (a1, b1);
+				h1 += 0.5;
 				
-				// Calculate influences
-				float i1 = dot (g1, d1);
-				float i2 = dot (g2, d2);
-				float i3 = dot (g3, d3);
-				float i4 = dot (g4, d4);
+				float2 a2 = float2 (x, y) - float2 (xf+1, yf);
+				a2 -= g2 * 0.5; //< Offset gradient (or, actually, offset pixel position, but the outcome is the same), so it's center is on the corner point
+				float2 b2 = g2;
+				float h2 = project (a2, b2);
+				h2 += 0.5;
 				
-				// Calculate average influence i guess ...
-				// TODO: make s-shape thingy
-				float avg = (i1+i2+i3+i4)/4;
+				float2 a3 = float2 (x, y) - float2 (xf, yf+1);
+				a3 -= g3 * 0.5; //< Offset gradient (or, actually, offset pixel position, but the outcome is the same), so it's center is on the corner point
+				float2 b3 = g3;
+				float h3 = project (a3, b3);
+				h3 += 0.5;
 				
-				return avg;
+				float2 a4 = float2 (x, y) - float2 (xf+1, yf+1);
+				a4 -= g4 * 0.5;	//< Offset gradient (or, actually, offset pixel position, but the outcome is the same), so it's center is on the corner point
+				float2 b4 = g4;
+				float h4 = project (a4, b4);
+				h4 += 0.5;
+				
+				// Calculate inverse distances to point
+				float d1 = 1/dist (float2(xf, yf), float2(x, y));
+				float d2 = 1/dist (float2(xf+1, yf), float2(x, y));
+				float d3 = 1/dist (float2(xf, yf+1), float2(x, y));
+				float d4 = 1/dist (float2(xf+1, yf+1), float2(x, y));
+				
+				// Calculate infuences
+				float d1234 = d1+d2+d3+d4;
+				float i1 = d1/d1234;
+				float i2 = d2/d1234;
+				float i3 = d3/d1234;
+				float i4 = d4/d1234;
+				
+				// Smoothen influences
+				i1 = blendf (i1);
+				i2 = blendf (i2);
+				i3 = blendf (i3);
+				i4 = blendf (i4);
+				
+				// Blend heights
+				float h = h1*i1 + h2*i2 + h3*i3 + h4*i4;
+				
+				h += 0.5;
+				
+				return h;
 			}
 			
-			float noise2d2 (float x, float y)
+			float perlin3d (float x, float y, float z)
 			{
-				// Get heights at corners
+				// Get gradients of corners
 				float xf = floor(x);
 				float yf = floor(y);
-				float g1 = random (xf+yf*1000, 81619);
-				float g2 = random (xf+1+yf*1000, 81619);
-				float g3 = random (xf+(yf+1)*1000, 81619);
-				float g4 = random (xf+1+(yf+1)*1000+1, 81619);
+				float zf = floor(z);
+				// Their coordinates
+				float3 c1 = float3 (xf, yf, zf);
+				float3 c2 = float3 (xf+1, yf, zf);
+				float3 c3 = float3 (xf+1, yf, zf+1);
+				float3 c4 = float3 (xf, yf, zf+1);
+				float3 c5 = float3 (xf, yf+1, zf);
+				float3 c6 = float3 (xf+1, yf+1, zf);
+				float3 c7 = float3 (xf+1, yf+1, zf+1);
+				float3 c8 = float3 (xf, yf+1, zf+1);
+				// The actual gradients
+				float2 g1 = randomGradient3d (c1);
+				float2 g2 = randomGradient3d (c2);
+				float2 g3 = randomGradient3d (c3);
+				float2 g4 = randomGradient3d (c4);
+				float2 g5 = randomGradient3d (c5);
+				float2 g6 = randomGradient3d (c6);
+				float2 g7 = randomGradient3d (c7);
+				float2 g8 = randomGradient3d (c8);
 				
-				// Get inverse length of distances
-				float l1 = 1/dist(float2(x, y), float2(xf, yf));
-				float l2 = 1/dist(float2(x, y), float2(xf+1, yf));
-				float l3 = 1/dist(float2(x, y), float2(xf, yf+1));
-				float l4 = 1/dist(float2(x, y), float2(xf+1, yf+1));
+				// Calculate heights from gradients 
+				float2 a1 = float2 (x, y) - float2 (xf, yf);
+				a1 -= g1 * 0.5; //< Offset gradient (or, actually, offset pixel position, but the outcome is the same), so it's center is on the corner point
+				float2 b1 = g1;
+				float h1 = project (a1, b1);
+				h1 += 0.5;
 				
-				// get average
-				float avg = (g1*l1+g2*l2+g3*l3+g4*l4)/(l1+l2+l3+l4);
+				float2 a2 = float2 (x, y) - float2 (xf+1, yf);
+				a2 -= g2 * 0.5; //< Offset gradient (or, actually, offset pixel position, but the outcome is the same), so it's center is on the corner point
+				float2 b2 = g2;
+				float h2 = project (a2, b2);
+				h2 += 0.5;
 				
-				return avg;
+				float2 a3 = float2 (x, y) - float2 (xf, yf+1);
+				a3 -= g3 * 0.5; //< Offset gradient (or, actually, offset pixel position, but the outcome is the same), so it's center is on the corner point
+				float2 b3 = g3;
+				float h3 = project (a3, b3);
+				h3 += 0.5;
+				
+				float2 a4 = float2 (x, y) - float2 (xf+1, yf+1);
+				a4 -= g4 * 0.5;	//< Offset gradient (or, actually, offset pixel position, but the outcome is the same), so it's center is on the corner point
+				float2 b4 = g4;
+				float h4 = project (a4, b4);
+				h4 += 0.5;
+				
+				// Calculate inverse distances to point
+				float d1 = 1/dist (float2(xf, yf), float2(x, y));
+				float d2 = 1/dist (float2(xf+1, yf), float2(x, y));
+				float d3 = 1/dist (float2(xf, yf+1), float2(x, y));
+				float d4 = 1/dist (float2(xf+1, yf+1), float2(x, y));
+				
+				// Calculate infuences
+				float d1234 = d1+d2+d3+d4;
+				float i1 = d1/d1234;
+				float i2 = d2/d1234;
+				float i3 = d3/d1234;
+				float i4 = d4/d1234;
+				
+				// Smoothen influences
+				i1 = blendf (i1);
+				i2 = blendf (i2);
+				i3 = blendf (i3);
+				i4 = blendf (i4);
+				
+				// Blend heights
+				float h = h1*i1 + h2*i2 + h3*i3 + h4*i4;
+				
+				h += 0.5;
+				
+				return h;
 			}
 			
 			//--------------------------------------------------------------------------------
@@ -140,8 +285,7 @@
 
             fixed4 frag (v2f i) : SV_Target
             {
-				return noise2d2 (i.oPos.x, i.oPos.y);
-				//return float4(random(floor(i.oPos.x), 81619), -random(floor(i.oPos.x), 81619), random(floor(i.oPos.y), 83443), 1);
+				return perlin3d (i.oPos.x, i.oPos.y, i.oPos.z);
             }
 			
             ENDCG

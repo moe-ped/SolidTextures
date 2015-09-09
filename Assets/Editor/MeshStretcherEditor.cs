@@ -13,5 +13,9 @@ public class MeshStretcherEditor : Editor
         {
             Stretcher.Stretch();
         }
+        if (GUILayout.Button("Reset"))
+        {
+            Stretcher.Reset();
+        }
     }
 }
