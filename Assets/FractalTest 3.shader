@@ -3,7 +3,7 @@
 		//_Color ("Color", Color) = (1,1,1,1)
 		_Time ("Time", Float) = 1
 		_Color1 ("Color 1", Color) = (1, 1, 1, 1)
-		_Color2 ("Color 1", Color) = (0, 0, 0, 1)
+		_Color2 ("Color 2", Color) = (0, 0, 0, 1)
 		// TODO: think about naming
 		_Frequency ("Frequency", Float) = 1
 	}
@@ -23,6 +23,7 @@
 			fixed4 _Color1;
 			fixed4 _Color2;
 			//float _Time;
+			float _Frequency;
 
             struct v2f {
                 float4 pos : SV_POSITION;
@@ -64,14 +65,25 @@
 				return g1.x*g2.x + g1.y*g2.y;
 			}
 			
+			float dot (float3 g1, float3 g2)
+			{
+				return g1.x*g2.x + g1.y*g2.y + g1.z*g2.z;
+			}
+			
 			float dist (float2 g1, float2 g2)
 			{
 				float2 d = g2 - g1;
 				return length (d);
 			}
 			
-			// Project a onto b
-			float2 project (float2 a, float2 b)
+			// Project a onto b. 2d version
+			float project (float2 a, float2 b)
+			{
+				return dot (a, b)/length(b);
+			}
+			
+			// Project a onto b. 3d version
+			float project (float3 a, float3 b)
 			{
 				return dot (a, b)/length(b);
 			}
@@ -133,7 +145,8 @@
 			//--------------------------------------------------------------------------------
 			//--------------------------- STUFF THAT DOES STUFF ------------------------------
 			//--------------------------------------------------------------------------------
-
+			
+			// TODO: continue refactoring here
 			float perlin2d (float x, float y)
 			{
 				// Get gradients of corners
@@ -196,7 +209,7 @@
 				return h;
 			}
 			
-			float perlin3d (float x, float y, float z)
+			float4 perlin3d (float x, float y, float z)
 			{
 				// Get gradients of corners
 				float xf = floor(x);
@@ -212,61 +225,100 @@
 				float3 c7 = float3 (xf+1, yf+1, zf+1);
 				float3 c8 = float3 (xf, yf+1, zf+1);
 				// The actual gradients
-				float2 g1 = randomGradient3d (c1);
-				float2 g2 = randomGradient3d (c2);
-				float2 g3 = randomGradient3d (c3);
-				float2 g4 = randomGradient3d (c4);
-				float2 g5 = randomGradient3d (c5);
-				float2 g6 = randomGradient3d (c6);
-				float2 g7 = randomGradient3d (c7);
-				float2 g8 = randomGradient3d (c8);
+				float3 g1 = randomGradient3d (c1);
+				float3 g2 = randomGradient3d (c2);
+				float3 g3 = randomGradient3d (c3);
+				float3 g4 = randomGradient3d (c4);
+				float3 g5 = randomGradient3d (c5);
+				float3 g6 = randomGradient3d (c6);
+				float3 g7 = randomGradient3d (c7);
+				float3 g8 = randomGradient3d (c8);
 				
 				// Calculate heights from gradients 
-				float2 a1 = float2 (x, y) - float2 (xf, yf);
+				// Pixel position
+				float3 p = float3 (x, y, z);
+				
+				float3 a1 = p - c1;
 				a1 -= g1 * 0.5; //< Offset gradient (or, actually, offset pixel position, but the outcome is the same), so it's center is on the corner point
-				float2 b1 = g1;
+				float3 b1 = g1;
 				float h1 = project (a1, b1);
 				h1 += 0.5;
 				
-				float2 a2 = float2 (x, y) - float2 (xf+1, yf);
+				float3 a2 = p - c2;
 				a2 -= g2 * 0.5; //< Offset gradient (or, actually, offset pixel position, but the outcome is the same), so it's center is on the corner point
-				float2 b2 = g2;
+				float3 b2 = g2;
 				float h2 = project (a2, b2);
 				h2 += 0.5;
 				
-				float2 a3 = float2 (x, y) - float2 (xf, yf+1);
+				float3 a3 = p - c3;
 				a3 -= g3 * 0.5; //< Offset gradient (or, actually, offset pixel position, but the outcome is the same), so it's center is on the corner point
-				float2 b3 = g3;
+				float3 b3 = g3;
 				float h3 = project (a3, b3);
 				h3 += 0.5;
 				
-				float2 a4 = float2 (x, y) - float2 (xf+1, yf+1);
-				a4 -= g4 * 0.5;	//< Offset gradient (or, actually, offset pixel position, but the outcome is the same), so it's center is on the corner point
-				float2 b4 = g4;
+				float3 a4 = p - c4;
+				a4 -= g4 * 0.5; //< Offset gradient (or, actually, offset pixel position, but the outcome is the same), so it's center is on the corner point
+				float3 b4 = g4;
 				float h4 = project (a4, b4);
 				h4 += 0.5;
 				
+				float3 a5 = p - c5;
+				a5 -= g5 * 0.5; //< Offset gradient (or, actually, offset pixel position, but the outcome is the same), so it's center is on the corner point
+				float3 b5 = g5;
+				float h5 = project (a5, b5);
+				h5 += 0.5;
+				
+				float3 a6 = p - c6;
+				a6 -= g6 * 0.5; //< Offset gradient (or, actually, offset pixel position, but the outcome is the same), so it's center is on the corner point
+				float3 b6 = g6;
+				float h6 = project (a6, b6);
+				h6 += 0.5;
+				
+				float3 a7 = p - c7;
+				a7 -= g7 * 0.5; //< Offset gradient (or, actually, offset pixel position, but the outcome is the same), so it's center is on the corner point
+				float3 b7 = g7;
+				float h7 = project (a7, b7);
+				h7 += 0.5;
+				
+				float3 a8 = p - c8;
+				a8 -= g8 * 0.5; //< Offset gradient (or, actually, offset pixel position, but the outcome is the same), so it's center is on the corner point
+				float3 b8 = g8;
+				float h8 = project (a8, b8);
+				h8 += 0.5;
+				
 				// Calculate inverse distances to point
-				float d1 = 1/dist (float2(xf, yf), float2(x, y));
-				float d2 = 1/dist (float2(xf+1, yf), float2(x, y));
-				float d3 = 1/dist (float2(xf, yf+1), float2(x, y));
-				float d4 = 1/dist (float2(xf+1, yf+1), float2(x, y));
+				float d1 = 1/dist (c1, p);
+				float d2 = 1/dist (c2, p);
+				float d3 = 1/dist (c3, p);
+				float d4 = 1/dist (c4, p);
+				float d5 = 1/dist (c5, p);
+				float d6 = 1/dist (c6, p);
+				float d7 = 1/dist (c7, p);
+				float d8 = 1/dist (c8, p);
 				
 				// Calculate infuences
-				float d1234 = d1+d2+d3+d4;
-				float i1 = d1/d1234;
-				float i2 = d2/d1234;
-				float i3 = d3/d1234;
-				float i4 = d4/d1234;
+				float d12345678 = d1+d2+d3+d4+d5+d6+d7+d8;
+				float i1 = d1/d12345678;
+				float i2 = d2/d12345678;
+				float i3 = d3/d12345678;
+				float i4 = d4/d12345678;
+				float i5 = d5/d12345678;
+				float i6 = d6/d12345678;
+				float i7 = d7/d12345678;
+				float i8 = d8/d12345678;
 				
 				// Smoothen influences
 				i1 = blendf (i1);
 				i2 = blendf (i2);
 				i3 = blendf (i3);
 				i4 = blendf (i4);
+				i5 = blendf (i5);
+				i6 = blendf (i6);
+				i7 = blendf (i7);
+				i8 = blendf (i8);
 				
 				// Blend heights
-				float h = h1*i1 + h2*i2 + h3*i3 + h4*i4;
+				float h = h1*i1 + h2*i2 + h3*i3 + h4*i4 + h5*i5 + h6*i6 + h7*i7 + h8*i8;
 				
 				h += 0.5;
 				
@@ -288,7 +340,30 @@
 
             fixed4 frag (v2f i) : SV_Target
             {
-				return perlin2d (i.oPos.x, i.oPos.y);
+				float x = i.oPos.x;
+				float y = i.oPos.y;
+				x *= _Frequency;
+				y *= _Frequency;
+				float h = 0;
+				float4 c = float4 (0, 0, 0, 0);
+				float perlin1 = perlin2d (x, y);
+				float perlin2 = perlin2d (x*5, y*5);
+				float percent = (sin (_Time*10)/2+0.5)/2+0.2;
+				if (perlin1 < percent)
+				{
+					h = perlin1*10;
+					h = h - floor(h);
+					c = _Color1 * h;
+				}
+				else 
+				{
+					h = perlin2;
+					c.r = sin (_Time*x);
+					c.g = cos (_Time*y);
+					c.b = cos (_Time*2*x*perlin1);
+					c =  c * h;
+				}
+				return c;
 				//return perlin3d (i.oPos.x, i.oPos.y, i.oPos.z);
             }
 			
