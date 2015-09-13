@@ -200,17 +200,17 @@
 				float i3 = 1-dist (float2(xf, yf+1), float2(x, y));
 				float i4 = 1-dist (float2(xf+1, yf+1), float2(x, y));
 				
-				// Smoothen influences
-				i1 = blendf (i1);
-				i2 = blendf (i2);
-				i3 = blendf (i3);
-				i4 = blendf (i4);
-				
 				// Clamp influences
 				i1 = clamp (i1, 0, 1);
 				i2 = clamp (i2, 0, 1);
 				i3 = clamp (i3, 0, 1);
 				i4 = clamp (i4, 0, 1);
+				
+				// Smoothen influences
+				i1 = blendf (i1);
+				i2 = blendf (i2);
+				i3 = blendf (i3);
+				i4 = blendf (i4);
 				
 				// Blend heights
 				float h = h1*i1 + h2*i2 + h3*i3 + h4*i4;
@@ -298,25 +298,24 @@
 				h8 += 0.5;
 				
 				// Calculate inverse distances to point
-				float d1 = 1/dist (c1, p);
-				float d2 = 1/dist (c2, p);
-				float d3 = 1/dist (c3, p);
-				float d4 = 1/dist (c4, p);
-				float d5 = 1/dist (c5, p);
-				float d6 = 1/dist (c6, p);
-				float d7 = 1/dist (c7, p);
-				float d8 = 1/dist (c8, p);
+				float i1 = 1-dist (c1, p);
+				float i2 = 1-dist (c2, p);
+				float i3 = 1-dist (c3, p);
+				float i4 = 1-dist (c4, p);
+				float i5 = 1-dist (c5, p);
+				float i6 = 1-dist (c6, p);
+				float i7 = 1-dist (c7, p);
+				float i8 = 1-dist (c8, p);
 				
-				// Calculate infuences
-				float d12345678 = d1+d2+d3+d4+d5+d6+d7+d8;
-				float i1 = d1/d12345678;
-				float i2 = d2/d12345678;
-				float i3 = d3/d12345678;
-				float i4 = d4/d12345678;
-				float i5 = d5/d12345678;
-				float i6 = d6/d12345678;
-				float i7 = d7/d12345678;
-				float i8 = d8/d12345678;
+				// Clamp influences
+				i1 = clamp(i1, 0, 1);
+				i2 = clamp(i2, 0, 1);
+				i3 = clamp(i3, 0, 1);
+				i4 = clamp(i4, 0, 1);
+				i5 = clamp(i5, 0, 1);
+				i6 = clamp(i6, 0, 1);
+				i7 = clamp(i7, 0, 1);
+				i8 = clamp(i8, 0, 1);
 				
 				// Smoothen influences
 				i1 = blendf (i1);
@@ -364,7 +363,7 @@
 				float x = i.oPos.x;
 				float y = i.oPos.y;
 				float z = i.oPos.z;
-				return perlin2d (x, y);
+				return perlin3d (x, y, z);
             }
 			
             ENDCG
