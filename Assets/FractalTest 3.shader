@@ -76,6 +76,12 @@
 				return length (d);
 			}
 			
+			float dist (float3 g1, float3 g2)
+			{
+				float3 d = g2 - g1;
+				return length (d);
+			}
+			
 			// Project a onto b. 2d version
 			float project (float2 a, float2 b)
 			{
@@ -146,8 +152,14 @@
 			//--------------------------- STUFF THAT DOES STUFF ------------------------------
 			//--------------------------------------------------------------------------------
 			
+			// Sawtooth curve
+			float saw (float x)
+			{
+				return x - floor (x);
+			}
+			
 			// TODO: continue refactoring here
-			float perlin2d (float x, float y)
+			float4 perlin2d (float x, float y)
 			{
 				// Get gradients of corners
 				float xf = floor(x);
@@ -182,24 +194,23 @@
 				float h4 = project (a4, b4);
 				h4 += 0.5;
 				
-				// Calculate inverse distances to point
-				float d1 = 1/dist (float2(xf, yf), float2(x, y));
-				float d2 = 1/dist (float2(xf+1, yf), float2(x, y));
-				float d3 = 1/dist (float2(xf, yf+1), float2(x, y));
-				float d4 = 1/dist (float2(xf+1, yf+1), float2(x, y));
-				
-				// Calculate infuences
-				float d1234 = d1+d2+d3+d4;
-				float i1 = d1/d1234;
-				float i2 = d2/d1234;
-				float i3 = d3/d1234;
-				float i4 = d4/d1234;
+				// Calculate influences
+				float i1 = 1-dist (float2(xf, yf), float2(x, y));
+				float i2 = 1-dist (float2(xf+1, yf), float2(x, y));
+				float i3 = 1-dist (float2(xf, yf+1), float2(x, y));
+				float i4 = 1-dist (float2(xf+1, yf+1), float2(x, y));
 				
 				// Smoothen influences
 				i1 = blendf (i1);
 				i2 = blendf (i2);
 				i3 = blendf (i3);
 				i4 = blendf (i4);
+				
+				// Clamp influences
+				i1 = clamp (i1, 0, 1);
+				i2 = clamp (i2, 0, 1);
+				i3 = clamp (i3, 0, 1);
+				i4 = clamp (i4, 0, 1);
 				
 				// Blend heights
 				float h = h1*i1 + h2*i2 + h3*i3 + h4*i4;
@@ -209,7 +220,7 @@
 				return h;
 			}
 			
-			float4 perlin3d (float x, float y, float z)
+			float perlin3d (float x, float y, float z)
 			{
 				// Get gradients of corners
 				float xf = floor(x);
@@ -320,9 +331,19 @@
 				// Blend heights
 				float h = h1*i1 + h2*i2 + h3*i3 + h4*i4 + h5*i5 + h6*i6 + h7*i7 + h8*i8;
 				
-				h += 0.5;
+				// TODO: fix, doesn't return values between 0 and 1
+				h = h+0.5;
 				
 				return h;
+			}
+			
+			// Test
+			// p: position of the pixel in 3d (usually object) space
+			// f: frequency
+			float perlin3d (float3 p, float f)
+			{
+				p = p*f;
+				return perlin3d (p.x, p.y, p.z);
 			}
 			
 			//--------------------------------------------------------------------------------
@@ -342,29 +363,8 @@
             {
 				float x = i.oPos.x;
 				float y = i.oPos.y;
-				x *= _Frequency;
-				y *= _Frequency;
-				float h = 0;
-				float4 c = float4 (0, 0, 0, 0);
-				float perlin1 = perlin2d (x, y);
-				float perlin2 = perlin2d (x*5, y*5);
-				float percent = (sin (_Time*10)/2+0.5)/2+0.2;
-				if (perlin1 < percent)
-				{
-					h = perlin1*10;
-					h = h - floor(h);
-					c = _Color1 * h;
-				}
-				else 
-				{
-					h = perlin2;
-					c.r = sin (_Time*x);
-					c.g = cos (_Time*y);
-					c.b = cos (_Time*2*x*perlin1);
-					c =  c * h;
-				}
-				return c;
-				//return perlin3d (i.oPos.x, i.oPos.y, i.oPos.z);
+				float z = i.oPos.z;
+				return perlin2d (x, y);
             }
 			
             ENDCG
