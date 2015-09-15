@@ -1,5 +1,7 @@
-﻿Shader "Custom/FractalTest 3" {
-	Properties {
+﻿Shader "Custom/FractalTest 3" 
+{
+	Properties 
+	{
 		//_Color ("Color", Color) = (1,1,1,1)
 		_Time ("Time", Float) = 1
 		_Color1 ("Color 1", Color) = (1, 1, 1, 1)
@@ -7,11 +9,13 @@
 		// TODO: think about naming
 		_Frequency ("Frequency", Float) = 1
 	}
-	SubShader {
+	SubShader 
+	{
 		Tags { "RenderType"="Opaque" "LightMode"="ForwardBase"}
 		LOD 200
 		
-		Pass {
+		Pass 
+		{
 
             CGPROGRAM
 			
@@ -26,7 +30,8 @@
 			//float _Time;
 			float _Frequency;
 
-            struct v2f {
+            struct v2f 
+			{
                 float4 pos : SV_POSITION;
 				float4 oPos : TEXCOORD0;
                 fixed3 color : COLOR0;
@@ -377,4 +382,5 @@
 
         }
 	}
+	CustomEditor "FractalMaterialEditor"
 }
