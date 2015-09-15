@@ -1,9 +1,10 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class MeshStretcher : MonoBehaviour {
-
-    public float Factor = 1;
+public class MeshStretcher : MonoBehaviour 
+{
+    // TODO: rename
+    public Vector3 Factor = Vector3.one;
 
     private Vector3[] OriginalVertices;
 
@@ -26,7 +27,9 @@ public class MeshStretcher : MonoBehaviour {
         Vector3[] vertices = Mesh.vertices;
         for (int i = 0; i < vertices.Length; i++ )
         {
-            vertices[i] *= Factor;
+            vertices[i].x = OriginalVertices[i].x * Factor.x;
+            vertices[i].y = OriginalVertices[i].y * Factor.y;
+            vertices[i].z = OriginalVertices[i].z * Factor.z;
         }
 
         Mesh.vertices = vertices;

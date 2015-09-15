@@ -8,7 +8,7 @@
 		_Frequency ("Frequency", Float) = 1
 	}
 	SubShader {
-		Tags { "RenderType"="Opaque" }
+		Tags { "RenderType"="Opaque" "LightMode"="ForwardBase"}
 		LOD 200
 		
 		Pass {
@@ -18,6 +18,7 @@
             #pragma vertex vert
             #pragma fragment frag
             #include "UnityCG.cginc"
+			#include "Lighting.cginc"
 			#pragma enable_d3d11_debug_symbols
 			
 			fixed4 _Color1;
@@ -29,6 +30,7 @@
                 float4 pos : SV_POSITION;
 				float4 oPos : TEXCOORD0;
                 fixed3 color : COLOR0;
+				float4 light : LightColor0;
             };
 			
 			//--------------------------------------------------------------------------------
@@ -58,16 +60,6 @@
 			float3 normalize (float3 g)
 			{
 				return g / length(g);
-			}
-			
-			float dot (float2 g1, float2 g2)
-			{
-				return g1.x*g2.x + g1.y*g2.y;
-			}
-			
-			float dot (float3 g1, float3 g2)
-			{
-				return g1.x*g2.x + g1.y*g2.y + g1.z*g2.z;
 			}
 			
 			float dist (float2 g1, float2 g2)
@@ -355,15 +347,30 @@
                 o.pos = mul (UNITY_MATRIX_MVP, v.vertex);
 				o.oPos = v.vertex;
                 o.color = v.normal;
+				o.light = dot (_WorldSpaceLightPos0, v.normal);
+				o.light = clamp (o.light, 0, 1);
+				o.light += UNITY_LIGHTMODEL_AMBIENT;
                 return o;
             }
 
             fixed4 frag (v2f i) : SV_Target
             {
+				float4 c = 0;
+				
 				float x = i.oPos.x;
 				float y = i.oPos.y;
 				float z = i.oPos.z;
-				return perlin3d (x, y, z);
+				float d = perlin3d (x/10, y/10, z/10)/2+0.5;
+				float detail = perlin3d (x*10, y/2, z*10);
+				float h = sin(perlin3d (x, y/(d*30)+detail/10, z)*20)/2+0.5;
+				c = lerp (_Color1, _Color2, h);
+				
+				c *= 0.8+(detail*detail*0.2);
+				
+				// Apply lighting
+				c *= i.light;
+				
+				return c;
             }
 			
             ENDCG
