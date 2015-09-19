@@ -1,4 +1,4 @@
-Shader "Custom/FractalTest 3" 
+Shader "Custom/TestMat" 
 {
 	Properties 
 	{
@@ -373,8 +373,10 @@ Shader "Custom/FractalTest 3"
 				c = 1;
 				
 				// Generated
-
-				// EndGenerated
+c=float4(1,0,0,0);
+c.g=0.5;
+c.b=0.2;
+// EndGenerated
 				
 				// Apply lighting
 				c *= i.light;
@@ -386,5 +388,5 @@ Shader "Custom/FractalTest 3"
 
         }
 	}
-	CustomEditor "FractalMaterialPreEditor"
+	CustomEditor "FractalMaterialEditor"
 }

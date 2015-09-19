@@ -1,4 +1,4 @@
-Shader "Custom/FractalTest 3" 
+Shader "Custom/lol" 
 {
 	Properties 
 	{
@@ -369,12 +369,12 @@ Shader "Custom/FractalTest 3"
 				float detail = perlin3d (x*10, y/2, z*10);
 				float h = sin(perlin3d (x, y/(d*30)+detail/10, z)*20)/2+0.5;
 				c = lerp (_Color1, _Color2, h);
-				c *= 0.8+(detail*detail*0.2);
-				c = 1;
 				
 				// Generated
-
+c = float4 (1, 0, 1, 1);
 				// EndGenerated
+				
+				c *= 0.8+(detail*detail*0.2);
 				
 				// Apply lighting
 				c *= i.light;
@@ -386,5 +386,5 @@ Shader "Custom/FractalTest 3"
 
         }
 	}
-	CustomEditor "FractalMaterialPreEditor"
+	CustomEditor "FractalMaterialEditor"
 }
