@@ -3,7 +3,7 @@ using System.Collections;
 
 public class GUIDraggableObject
 {
-	protected Vector2 Position;
+	public Vector2 Position;
 	private Vector2 DragStart;
 	private bool _dragging;
 	protected bool _draggingInput;

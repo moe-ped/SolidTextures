@@ -1,4 +1,4 @@
-Shader "Custom/TestMat" 
+Shader "Custom/TestMat (Instance)" 
 {
 	Properties 
 	{
@@ -372,7 +372,7 @@ Shader "Custom/TestMat"
 				c *= 0.8+(detail*detail*0.2);
 				c = 1;
 				
-				/*Generated*/c=float4(0.09558821,0.01686851,0.01686851,0.01686851);/*EndGenerated*/
+				/*Generated*//*EndGenerated*/
 				
 				// Apply lighting
 				c *= i.light;

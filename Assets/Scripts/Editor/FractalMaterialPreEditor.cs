@@ -21,7 +21,7 @@ public class FractalMaterialPreEditor : ShaderGUI
 			string content = File.ReadAllText(TEMPLATE_PATH);
 			content = content.Replace(ORIGINAL_SHADER_NAME, materialEditor.target.name);
 			content = content.Replace(PRE_EDITOR, EDITOR);
-			File.WriteAllText(string.Format(OUTPUT_PATH, materialEditor.target.name + ".shader"), content);
+			File.WriteAllText(string.Format(OUTPUT_PATH, materialEditor.target.name.Split(' ')[0] + ".shader"), content);
 			Shader shader = Shader.Find(string.Format(SHADER_NAME_SYNTAX, materialEditor.target.name));
 			materialEditor.SetShader(shader);
 		}

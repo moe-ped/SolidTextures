@@ -96,7 +96,7 @@ Shader "Custom/FractalTest 3"
 			{
 				// I stole this from somewhere (and then butchered it)
 				// TODO: Remember where I found this and give credit or whatever
-				int r = int (x);	// TODO: Refactor, this is really stupid and counterintuitive (one might expect to get different numbers in-between whole numbers. Fools :D)
+				int r = int (x);	//< TODO: Refactor, this is really stupid and counterintuitive (one might expect to get different numbers in-between whole numbers. Fools :D)
 				r = (r<<13) ^ r;
 				return ( 1.0 - ( (r * (r * r * primeSeed + 789221) + 1376312589) & 2147483647) / 1073741824.0);
 			}
@@ -372,9 +372,7 @@ Shader "Custom/FractalTest 3"
 				c *= 0.8+(detail*detail*0.2);
 				c = 1;
 				
-				// Generated
-
-				// EndGenerated
+				/*Generated*//*EndGenerated*/
 				
 				// Apply lighting
 				c *= i.light;
