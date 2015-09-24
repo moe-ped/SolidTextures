@@ -140,8 +140,8 @@ public class Node : GUIDraggableObject
 					DraggedInputNode.Inputs[DraggedInputNode.DraggedInputID] = this;
 					DraggedInputNode.DraggedInputID = -1;
 					DraggedInputNode = null;
-					// Generate
-					EditorWindow.GetWindow<MaterialNodeEditor>().WriteOutput ();
+					// Generate. Takes a bit too long to do this all the time
+					//EditorWindow.GetWindow<MaterialNodeEditor>().WriteOutput ();
 				}
 			}
 		}

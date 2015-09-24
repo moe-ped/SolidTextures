@@ -56,7 +56,6 @@ public class MaterialNodeEditor : EditorWindow
 	private Vector2 scrollPosition = new Vector2 (1000, 1000);
 	private string SelectedmaterialName = "";
 
-	private string TEMPLATE_PATH = Application.dataPath + "/Shader/FractalTest 3.shader";
 	private string OUTPUT_PATH = Application.dataPath + "/Shader/Generated/{0}";
 	private string WINDOW_SAVESTATE_PATH = Application.dataPath + "/Shader/Generated/{0}";
 	private string RELATIVE_OUTPUT_PATH = "Assets/Shader/Generated/{0}";
@@ -69,16 +68,19 @@ public class MaterialNodeEditor : EditorWindow
 	[MenuItem("Window/MaterialNodeEditor")]
 	static void Init()
 	{
-		GetWindow<MaterialNodeEditor>();
+		var window = GetWindow<MaterialNodeEditor>();
+		window.LoadState ();
 	}
 
-	private void Reset ()
+	public void Reset ()
 	{
 		Nodes = new List<Node> ();
 		if (GetSelectedMaterialName () != "") 
 		{
 			Nodes.Add(new OutputNode(new Vector2(1200, 1200)));
 		}
+		scrollPosition = new Vector2 (1000, 1000);
+		SaveState ();
 	}
 
 	public void OnEnable()
@@ -134,7 +136,6 @@ public class MaterialNodeEditor : EditorWindow
 		dropTargetRect = new Rect (0, 0, 50, 50);
 		dropTargetRect.x += scrollPosition.x + this.position.width - 80;
 		dropTargetRect.y += scrollPosition.y + this.position.height - 120;
-		GUI.Box(dropTargetRect, "Recycle");
 		toFront = dropDead = null;
 		doRepaint = false;
 		flipRepaint = false;
@@ -203,6 +204,8 @@ public class MaterialNodeEditor : EditorWindow
 		{
 			Repaint();
 		}
+		
+		GUI.Box(dropTargetRect, "Recycle");
 
 		GUI.EndScrollView ();
 
@@ -215,8 +218,15 @@ public class MaterialNodeEditor : EditorWindow
 
 			menu.AddItem (new GUIContent ("New Variable/Color"), false, () => {Nodes.Add(new ColorNode(mousePos));});
 			menu.AddItem (new GUIContent ("New Variable/Float"), false, () => {Nodes.Add(new FloatNode(mousePos));});
+			menu.AddItem (new GUIContent ("New Variable/Builtin/Time"), false, () => {Nodes.Add(new TimeNode(mousePos));});
+			menu.AddItem (new GUIContent ("New Variable/Builtin/X"), false, () => {Nodes.Add(new XNode(mousePos));});
+			menu.AddItem (new GUIContent ("New Variable/Builtin/Y"), false, () => {Nodes.Add(new YNode(mousePos));});
+			menu.AddItem (new GUIContent ("New Variable/Builtin/Z"), false, () => {Nodes.Add(new ZNode(mousePos));});
 			menu.AddItem (new GUIContent ("New Function/Lerp"), false, () => {Nodes.Add(new LerpNode(mousePos));});
+			menu.AddItem (new GUIContent ("New Function/Length"), false, () => {Nodes.Add(new LengthNode(mousePos));});
 			menu.AddItem (new GUIContent ("New Function/Multiply"), false, () => {Nodes.Add(new MultiplyNode(mousePos));});
+			menu.AddItem (new GUIContent ("New Function/Add"), false, () => {Nodes.Add(new AddNode(mousePos));});
+			menu.AddItem (new GUIContent ("New Function/Divide"), false, () => {Nodes.Add(new DivideNode(mousePos));});
 			menu.AddItem (new GUIContent ("New Function/Sawtooth"), false, () => {Nodes.Add(new SawNode(mousePos));});
 			menu.AddItem (new GUIContent ("New Noise/Perlin"), false, () => {Nodes.Add(new PerlinNode(mousePos));});
 			

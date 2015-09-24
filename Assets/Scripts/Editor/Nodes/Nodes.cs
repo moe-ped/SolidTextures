@@ -72,7 +72,46 @@ public class MultiplyNode : Node
 		Name = "Multiply";
 		Inputs = new Node[2];
 		InputNames = new string[] { "x", "y" };
-		Content = "{0}*{1}";
+		Content = "({0}*{1})";
+		HasOutput = true;
+	}
+}
+
+public class DivideNode : Node
+{
+	public DivideNode(Vector2 position)
+		: base(position)
+	{
+		Name = "Divide";
+		Inputs = new Node[2];
+		InputNames = new string[] { "x", "y" };
+		Content = "({0}/{1})";
+		HasOutput = true;
+	}
+}
+
+public class AddNode : Node
+{
+	public AddNode(Vector2 position)
+		: base(position)
+	{
+		Name = "Add";
+		Inputs = new Node[2];
+		InputNames = new string[] { "x", "y" };
+		Content = "({0}+{1})";
+		HasOutput = true;
+	}
+}
+
+public class LengthNode : Node
+{
+	public LengthNode(Vector2 position)
+		: base(position)
+	{
+		Name = "Length";
+		Inputs = new Node[2];
+		InputNames = new string[] { "x", "y" };
+		Content = "length(float2({0},{1}))";
 		HasOutput = true;
 	}
 }
@@ -86,6 +125,50 @@ public class SawNode : Node
 		Inputs = new Node[1];
 		InputNames = new string[] { "x" };
 		Content = "saw({0})";
+		HasOutput = true;
+	}
+}
+
+public class TimeNode : Node
+{
+	public TimeNode(Vector2 position)
+		: base(position)
+	{
+		Name = "Time";
+		Content = "_Time";
+		HasOutput = true;
+	}
+}
+
+public class XNode : Node
+{
+	public XNode(Vector2 position)
+		: base(position)
+	{
+		Name = "X";
+		Content = "x";
+		HasOutput = true;
+	}
+}
+
+public class YNode : Node
+{
+	public YNode(Vector2 position)
+		: base(position)
+	{
+		Name = "Y";
+		Content = "y";
+		HasOutput = true;
+	}
+}
+
+public class ZNode : Node
+{
+	public ZNode(Vector2 position)
+		: base(position)
+	{
+		Name = "Z";
+		Content = "z";
 		HasOutput = true;
 	}
 }

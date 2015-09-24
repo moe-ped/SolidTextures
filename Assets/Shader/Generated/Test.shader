@@ -1,4 +1,4 @@
-Shader "Custom/TestMat" 
+Shader "Custom/Generated/Test" 
 {
 	Properties 
 	{
@@ -372,7 +372,7 @@ Shader "Custom/TestMat"
 				c *= 0.8+(detail*detail*0.2);
 				c = 1;
 				
-				/*Generated*/c=lerp(float4(0.9485294,0.8838832,0.6137543,0.6137543),float4(0.75,0.6613083,0.1654412,0.1654412),saw(length(float2((30*(x+(perlin3d(10*x,10*y,5*z)*0.04))),(((perlin3d(10*x,10*y,5*z)*0.04)+y)*30)))));/*EndGenerated*/
+				/*Generated*/c=float4(0.8308824,0.07942256,0.07942256,0.07942256);/*EndGenerated*/
 				
 				// Apply lighting
 				c *= i.light;
